@@ -1,0 +1,15 @@
+This is a test file for the duplicate detection system.
+It contains sample text content that will be used to test:
+1. Text extraction from .txt files
+2. SHA-256 hash calculation
+3. Duplicate detection in MongoDB
+4. File storage to /uploads folder
+
+The file upload endpoint should process this file and:
+- Extract this text content using BufferedReader
+- Calculate a SHA-256 hash of the content
+- Check MongoDB for existing files with the same hash
+- Save the file to the uploads directory
+- Store metadata in MongoDB
+
+This is the enhanced file upload system implementation.

@@ -2,6 +2,9 @@ package com.yourname.filededup.controller;
 
 import com.yourname.filededup.model.FileRecord;
 import com.yourname.filededup.service.FileService;
+import com.yourname.filededup.service.FileContentService;
+import com.yourname.filededup.service.FileStorageService;
+import com.yourname.filededup.repository.FileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +14,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.time.LocalDateTime;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 @RestController
 @RequestMapping("/api/files")
@@ -19,6 +28,15 @@ public class FileController {
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private FileContentService fileContentService;
+
+    @Autowired
+    private FileStorageService fileStorageService;
+
+    @Autowired
+    private FileRepository fileRepository;
 
     // ============ CORE FILE OPERATIONS ============
 
@@ -70,19 +88,20 @@ public class FileController {
             // Process the uploaded file with user credentials
             FileRecord processedFile = fileService.processUploadedFileWithCredentials(file, email, password);
             
-            return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "File uploaded and processed successfully",
-                "file", processedFile,
-                "userEmail", email,
-                "originalFileName", file.getOriginalFilename(),
-                "fileSize", file.getSize(),
-                "formattedSize", processedFile.getFormattedFileSize(),
-                "mimeType", file.getContentType(),
-                "fileType", "validated",
-                "isDuplicate", processedFile.isDuplicate(),
-                "category", processedFile.getCategory()
-            ));
+            Map<String, Object> responseMap = new HashMap<>();
+            responseMap.put("success", true);
+            responseMap.put("message", "File uploaded and processed successfully");
+            responseMap.put("file", processedFile);
+            responseMap.put("userEmail", email);
+            responseMap.put("originalFileName", file.getOriginalFilename());
+            responseMap.put("fileSize", file.getSize());
+            responseMap.put("formattedSize", processedFile.getFormattedFileSize());
+            responseMap.put("mimeType", file.getContentType());
+            responseMap.put("fileType", "validated");
+            responseMap.put("isDuplicate", processedFile.isDuplicate());
+            responseMap.put("category", processedFile.getCategory());
+            
+            return ResponseEntity.ok(responseMap);
             
         } catch (Exception e) {
             return ResponseEntity.badRequest()
@@ -161,6 +180,191 @@ public class FileController {
                     "error", "Failed to process uploaded files: " + e.getMessage()
                 ));
         }
+    }
+
+    // ============ ENHANCED FILE UPLOAD WITH CONTENT PROCESSING ============
+
+    @PostMapping("/upload-enhanced")
+    public ResponseEntity<Map<String, Object>> uploadFileEnhanced(
+            @RequestParam("file") MultipartFile file) {
+        
+        try {
+            // 1. Basic file validation
+            if (file == null || file.isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "File is required"));
+            }
+
+            String fileName = file.getOriginalFilename();
+            String contentType = file.getContentType();
+            
+            // 2. Validate file type (only .txt, .pdf, .docx)
+            if (!isValidFileType(contentType, fileName)) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of(
+                        "error", "Only .txt, .pdf, and .docx files are allowed",
+                        "receivedType", contentType != null ? contentType : "unknown",
+                        "fileName", fileName != null ? fileName : "unknown",
+                        "allowedTypes", List.of("text/plain", "application/pdf", 
+                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                    ));
+            }
+
+            // 3. Validate file size (max 100MB)
+            if (file.getSize() > 100 * 1024 * 1024) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "File size exceeds maximum limit of 100MB"));
+            }
+
+            // 4. Get file extension
+            String fileExtension = fileContentService.getFileExtension(fileName);
+            
+            // 5. Extract text content based on file type
+            String textContent;
+            try {
+                textContent = fileContentService.extractTextContent(file, fileExtension);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Failed to extract content from file: " + e.getMessage()));
+            }
+
+            // 6. Calculate SHA-256 hash of the content
+            String contentHash = fileContentService.calculateContentHash(textContent);
+            
+            // 7. Check MongoDB for existing hash (duplicate detection)
+            List<FileRecord> existingFiles = fileRepository.findByFileHash(contentHash);
+            if (!existingFiles.isEmpty()) {
+                FileRecord existingFile = existingFiles.get(0);
+                return ResponseEntity.ok(Map.of(
+                    "success", false,
+                    "isDuplicate", true,
+                    "message", "Duplicate file detected",
+                    "existingFile", Map.of(
+                        "id", existingFile.getId(),
+                        "fileName", existingFile.getFileName(),
+                        "uploadDate", existingFile.getUploadedDate(),
+                        "filePath", existingFile.getFilePath(),
+                        "hash", existingFile.getFileHash()
+                    ),
+                    "contentHash", contentHash
+                ));
+            }
+
+            // 8. Generate unique filename and save to /uploads folder
+            String uniqueFileName = fileContentService.generateUniqueFileName(fileName);
+            
+            // Create uploads directory if it doesn't exist
+            String uploadDir = "uploads/";
+            Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+            Files.createDirectories(uploadPath);
+            
+            // Save file to uploads directory
+            Path targetPath = uploadPath.resolve(uniqueFileName);
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            String filePath = targetPath.toString();
+
+            // 9. Create FileRecord with metadata and save to MongoDB
+            FileRecord fileRecord = new FileRecord();
+            fileRecord.setFileName(fileName);
+            fileRecord.setFilePath(filePath);
+            fileRecord.setFileHash(contentHash);
+            fileRecord.setFileSize(file.getSize());
+            fileRecord.setFileExtension(fileExtension);
+            fileRecord.setMimeType(contentType);
+            fileRecord.setUploadedDate(LocalDateTime.now());
+            fileRecord.setCreatedDate(LocalDateTime.now());
+            fileRecord.setStoredFileName(uniqueFileName);
+            fileRecord.setChecksum(contentHash);
+            fileRecord.setChecksumAlgorithm("SHA-256");
+            fileRecord.setVerified(true);
+            fileRecord.setLastVerifiedDate(LocalDateTime.now());
+            fileRecord.setContentPreview(textContent.length() > 500 ? 
+                textContent.substring(0, 500) + "..." : textContent);
+            fileRecord.setHasPreview(true);
+            fileRecord.setDuplicate(false);
+
+            // Save to MongoDB
+            FileRecord savedFile = fileRepository.save(fileRecord);
+
+            // 10. Return success response with metadata
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("isDuplicate", false);
+            response.put("message", "File uploaded and processed successfully");
+            response.put("fileId", savedFile.getId());
+            response.put("fileName", fileName);
+            response.put("fileSize", file.getSize());
+            response.put("fileType", fileExtension);
+            response.put("uploadDate", savedFile.getUploadedDate());
+            response.put("filePath", filePath);
+            response.put("contentHash", contentHash);
+            response.put("contentPreview", fileRecord.getContentPreview());
+            response.put("textContentLength", textContent.length());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of(
+                    "success", false,
+                    "error", "Failed to process file upload: " + e.getMessage()
+                ));
+        }
+    }
+
+    // ============ TEST ENDPOINTS FOR ENHANCED UPLOAD ============
+
+    @PostMapping("/test-content-extraction")
+    public ResponseEntity<Map<String, Object>> testContentExtraction(
+            @RequestParam("file") MultipartFile file) {
+        try {
+            String fileName = file.getOriginalFilename();
+            String fileExtension = fileContentService.getFileExtension(fileName);
+            
+            if (!fileContentService.isValidFileType(fileName, file.getContentType())) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Invalid file type for testing"));
+            }
+            
+            String content = fileContentService.extractTextContent(file, fileExtension);
+            String hash = fileContentService.calculateContentHash(content);
+            
+            return ResponseEntity.ok(Map.of(
+                "fileName", fileName,
+                "fileExtension", fileExtension,
+                "contentLength", content.length(),
+                "contentPreview", content.length() > 200 ? content.substring(0, 200) + "..." : content,
+                "contentHash", hash,
+                "mimeType", file.getContentType(),
+                "fileSize", file.getSize()
+            ));
+            
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "Test failed: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/storage-info-enhanced")
+    public ResponseEntity<Map<String, Object>> getEnhancedStorageInfo() {
+        Map<String, Object> info = new HashMap<>();
+        info.put("uploadDirectory", "uploads/");
+        info.put("maxFileSize", "100MB");
+        info.put("allowedExtensions", List.of(".txt", ".pdf", ".docx"));
+        info.put("allowedMimeTypes", List.of(
+            "text/plain", 
+            "application/pdf", 
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ));
+        info.put("hashAlgorithm", "SHA-256");
+        info.put("contentExtraction", Map.of(
+            ".txt", "BufferedReader with UTF-8",
+            ".pdf", "Apache PDFBox PDFTextStripper",
+            ".docx", "Apache POI XWPFWordExtractor"
+        ));
+        info.put("duplicateDetection", "Content-based SHA-256 hash comparison");
+        
+        return ResponseEntity.ok(info);
     }
 
     // Enhanced helper method for strict file type validation
@@ -445,8 +649,9 @@ public class FileController {
             if (deleted) {
                 return ResponseEntity.ok(Map.of("message", "File deleted successfully"));
             } else {
-                return ResponseEntity.notFound()
-                    .body(Map.of("error", "File not found"));
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "File not found");
+                return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest()

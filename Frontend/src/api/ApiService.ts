@@ -1,6 +1,6 @@
 import { ApiResponse, ScanResult, LogEntry, FileInfo } from '../types/FileTypes';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 export class ApiService {
   private async request<T>(

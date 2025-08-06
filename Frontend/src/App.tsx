@@ -1,10 +1,11 @@
 import React, { useState, useCallback } from 'react';
-import { FolderOpen, Trash2, FileX, CheckSquare, Square, Download } from 'lucide-react';
+import { FolderOpen, Trash2, FileX, CheckSquare, Square, Download, Database } from 'lucide-react';
 import FileScanner from './components/FileScanner';
 import DuplicateList from './components/DuplicateList';
 import CategoryView from './components/CategoryView';
 import LogViewer from './components/LogViewer';
 import DirectoryScanner from './components/DirectoryScanner';
+import DatabaseTest from './components/DatabaseTest';
 import { FileInfo, DuplicateGroup, LogEntry } from './types/FileTypes';
 import { generateFileHash, exportLogs } from './utils/fileUtils';
 import { mockApiScan, mockApiDelete, mockApiSaveLogs, mockApiScanDirectories } from './api/mockApi';
@@ -15,7 +16,7 @@ function App() {
   const [categories, setCategories] = useState<Record<string, FileInfo[]>>({});
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [isScanning, setIsScanning] = useState(false);
-  const [activeTab, setActiveTab] = useState<'duplicates' | 'categories' | 'logs' | 'directories'>('duplicates');
+  const [activeTab, setActiveTab] = useState<'duplicates' | 'categories' | 'logs' | 'directories' | 'database'>('duplicates');
   const [logs, setLogs] = useState<LogEntry[]>([]);
 
   const handleFolderSelect = useCallback(async (selectedFiles: FileList) => {
@@ -262,6 +263,17 @@ function App() {
                   >
                     Directory Scan
                   </button>
+                  <button
+                    onClick={() => setActiveTab('database')}
+                    className={`px-4 py-2 rounded-md transition-all ${
+                      activeTab === 'database'
+                        ? 'bg-white shadow-sm text-indigo-600 font-medium'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    <Database size={16} className="inline mr-1" />
+                    Database Test
+                  </button>
                 </div>
               </div>
 
@@ -338,6 +350,10 @@ function App() {
             onDirectoryScan={handleDirectoryScan}
             isScanning={isScanning}
           />
+        )}
+
+        {activeTab === 'database' && (
+          <DatabaseTest />
         )}
         {/* Empty State */}
         {files.length === 0 && !isScanning && (

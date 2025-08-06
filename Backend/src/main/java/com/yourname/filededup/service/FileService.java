@@ -26,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class FileService {
@@ -593,7 +594,7 @@ public class FileService {
             allFiles.stream().mapToLong(FileRecord::getFileSize).average().orElse(0));
         
         // Category breakdown
-        Map<String, Long> categoryStats = getCategoryStatistics();
+        Map<String, Object> categoryStats = getCategoryStatistics();
         stats.put("categoryBreakdown", categoryStats);
         
         // Size breakdown
@@ -791,7 +792,7 @@ public class FileService {
     public Map<String, Object> cleanupOrphanedFiles() {
         List<FileRecord> allRecords = fileRepository.findAll();
         int orphanedRecords = 0;
-        int orphanedFiles = 0;
+        AtomicInteger orphanedFiles = new AtomicInteger(0);
         List<String> errors = new ArrayList<>();
         
         // Find database records without physical files
@@ -824,7 +825,7 @@ public class FileService {
                          .forEach(path -> {
                              try {
                                  Files.delete(path);
-                                 orphanedFiles++;
+                                 orphanedFiles.incrementAndGet();
                              } catch (IOException e) {
                                  errors.add("Failed to delete orphaned file: " + path.toString());
                              }
@@ -837,7 +838,7 @@ public class FileService {
         
         Map<String, Object> result = new HashMap<>();
         result.put("orphanedRecords", orphanedRecords);
-        result.put("orphanedFiles", orphanedFiles);
+        result.put("orphanedFiles", orphanedFiles.get());
         result.put("errors", errors);
         result.put("cleanupDate", LocalDateTime.now());
         
