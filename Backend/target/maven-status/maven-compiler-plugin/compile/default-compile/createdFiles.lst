@@ -1,0 +1,13 @@
+com\yourname\filededup\model\FileRecord.class
+com\yourname\filededup\service\LoggingService.class
+com\yourname\filededup\model\LogEntry.class
+com\yourname\filededup\controller\LogController.class
+com\yourname\filededup\config\MongoConfig.class
+com\yourname\filededup\repository\FileRepository.class
+com\yourname\filededup\service\FileService.class
+com\yourname\filededup\repository\LogRepository.class
+com\yourname\filededup\FileDedupApplication.class
+com\yourname\filededup\controller\FileController.class
+com\yourname\filededup\config\CorsConfig.class
+com\yourname\filededup\model\LogEntry$Level.class
+com\yourname\filededup\service\RuleEngineService.class
