@@ -1,0 +1,3 @@
+This is the first test document.
+It contains sample text content for testing the folder upload functionality.
+This file should be uploaded successfully as it's a .txt file.

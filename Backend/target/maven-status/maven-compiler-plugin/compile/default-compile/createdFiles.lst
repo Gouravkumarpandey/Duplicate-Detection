@@ -8,6 +8,7 @@ com\yourname\filededup\repository\FileRepository$ExtensionStatistics.class
 com\yourname\filededup\controller\FileUploadController.class
 com\yourname\filededup\repository\FileRepository$CategoryStatistics.class
 com\yourname\filededup\service\GridFSStorageService$GridFSFileInfo.class
+com\yourname\filededup\controller\FolderUploadController.class
 com\yourname\filededup\service\FileContentService.class
 com\yourname\filededup\config\CorsConfig.class
 com\yourname\filededup\model\LogEntry$Level.class
@@ -22,10 +23,13 @@ com\yourname\filededup\repository\FileRepository$SizeDistributionStatistics.clas
 com\yourname\filededup\repository\LogRepository.class
 com\yourname\filededup\service\GridFSStorageService.class
 com\yourname\filededup\FileDedupApplication.class
+com\yourname\filededup\dto\FolderUploadResponse.class
 com\yourname\filededup\service\FileValidationService.class
+com\yourname\filededup\dto\FileUploadResult.class
 com\yourname\filededup\model\FileModel.class
 com\yourname\filededup\controller\FileController.class
 com\yourname\filededup\service\RuleEngineService.class
+com\yourname\filededup\service\FolderUploadService.class
 com\yourname\filededup\util\FileHashUtil.class
 com\yourname\filededup\config\MongoAtlasConfig.class
 com\yourname\filededup\repository\FileModelRepository.class

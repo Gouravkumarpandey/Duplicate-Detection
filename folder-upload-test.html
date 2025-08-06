@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folder Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .upload-area {
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            background-color: #f8f9fa;
+        }
+        .upload-area:hover {
+            background-color: #e9ecef;
+        }
+        input[type="file"] {
+            margin: 20px 0;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .file-result {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #dee2e6;
+        }
+        .file-result.success { border-left-color: #28a745; }
+        .file-result.error { border-left-color: #dc3545; }
+        .file-result.duplicate { border-left-color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📂 Folder Upload Test</h1>
+        <p>Test the <code>/api/upload-folder</code> endpoint that accepts multiple files (.txt, .pdf, .docx only)</p>
+        
+        <div class="upload-area">
+            <h3>Select Multiple Files</h3>
+            <p>Choose files from a folder to upload. Only .txt, .pdf, and .docx files will be accepted.</p>
+            <input type="file" id="fileInput" multiple accept=".txt,.pdf,.docx">
+        </div>
+        
+        <button id="uploadBtn" onclick="uploadFiles()">Upload Files</button>
+        
+        <div id="results" class="results" style="display: none;">
+            <h3>Upload Results</h3>
+            <div id="summary"></div>
+            <div id="fileResults"></div>
+        </div>
+    </div>
+
+    <script>
+        async function uploadFiles() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const results = document.getElementById('results');
+            const summary = document.getElementById('summary');
+            const fileResults = document.getElementById('fileResults');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Please select files to upload');
+                return;
+            }
+            
+            // Disable button and show loading
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            results.style.display = 'none';
+            
+            try {
+                const formData = new FormData();
+                
+                // Add all selected files
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    formData.append('files', fileInput.files[i]);
+                }
+                
+                const response = await fetch('http://localhost:8080/api/upload-folder', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                // Show results
+                results.style.display = 'block';
+                
+                if (result.success) {
+                    summary.innerHTML = `
+                        <div class="success">
+                            <h4>✅ ${result.message}</h4>
+                            <p><strong>Total Files:</strong> ${result.totalFiles}</p>
+                            <p><strong>Successful:</strong> ${result.successfulUploads}</p>
+                            <p><strong>Failed:</strong> ${result.failedUploads}</p>
+                            <p><strong>Duplicates:</strong> ${result.duplicatesFound}</p>
+                            <p><strong>Success Rate:</strong> ${result.statistics.successRate.toFixed(1)}%</p>
+                        </div>
+                    `;
+                    
+                    // Show individual file results
+                    fileResults.innerHTML = result.uploadResults.map(fileResult => {
+                        const statusClass = fileResult.success ? 
+                            (fileResult.duplicate ? 'duplicate' : 'success') : 'error';
+                        const statusIcon = fileResult.success ? 
+                            (fileResult.duplicate ? '⚠️' : '✅') : '❌';
+                        
+                        return `
+                            <div class="file-result ${statusClass}">
+                                <strong>${statusIcon} ${fileResult.filename}</strong>
+                                <p>${fileResult.message}</p>
+                                ${fileResult.success ? `
+                                    <small>Hash: ${fileResult.hash}</small><br>
+                                    <small>Size: ${fileResult.fileSize} bytes</small>
+                                ` : `
+                                    <small class="error">Error: ${fileResult.error}</small>
+                                `}
+                            </div>
+                        `;
+                    }).join('');
+                    
+                } else {
+                    summary.innerHTML = `<div class="error"><h4>❌ Upload Failed</h4><p>${result.message}</p></div>`;
+                    fileResults.innerHTML = '';
+                }
+                
+            } catch (error) {
+                results.style.display = 'block';
+                summary.innerHTML = `<div class="error"><h4>❌ Network Error</h4><p>${error.message}</p></div>`;
+                fileResults.innerHTML = '';
+            } finally {
+                // Re-enable button
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload Files';
+            }
+        }
+        
+        // Show selected files count
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const count = e.target.files.length;
+            const button = document.getElementById('uploadBtn');
+            button.textContent = count > 0 ? `Upload ${count} Files` : 'Upload Files';
+        });
+    </script>
+</body>
+</html>
