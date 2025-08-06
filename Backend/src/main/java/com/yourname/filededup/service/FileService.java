@@ -39,6 +39,9 @@ public class FileService {
     @Autowired
     private LoggingService loggingService;
 
+    @Autowired
+    private FileStorageService fileStorageService;
+
     // Directory for storing uploaded files
     private static final String UPLOAD_DIRECTORY = "uploads/";
     private static final String TEMP_DIRECTORY = "temp/";
@@ -55,28 +58,22 @@ public class FileService {
         loggingService.logInfo("File upload initiated", "UPLOAD", 
             "User: " + email + ", File: " + fileName + ", Size: " + file.getSize() + " bytes");
 
-        // Create upload directory if it doesn't exist
-        Path uploadDir = Paths.get(UPLOAD_DIRECTORY);
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
-
-        // Generate unique filename to avoid conflicts
-        String uniqueFileName = generateUniqueFileName(fileName, email);
-        Path filePath = uploadDir.resolve(uniqueFileName);
-        
-        // Save the file
-        file.transferTo(filePath.toFile());
-
         try {
-            FileRecord fileRecord = createFileRecord(filePath);
+            // Use the new FileStorageService to store the file
+            FileStorageService.FileStorageResult storageResult = fileStorageService.storeFile(file, email);
+            
+            // Create FileRecord from the stored file
+            FileRecord fileRecord = createFileRecordFromStorage(storageResult);
             fileRecord.setFileName(fileName);
-            fileRecord.setStoredFileName(uniqueFileName);
-            fileRecord.setStorageLocation(filePath.toString());
+            fileRecord.setStoredFileName(storageResult.getStoredFileName());
+            fileRecord.setStorageLocation(storageResult.getPrimaryPath());
             fileRecord.setUploadedBy(email);
             fileRecord.setUploadedDate(LocalDateTime.now());
             fileRecord.setScannedDate(LocalDateTime.now());
             fileRecord.setMimeType(file.getContentType());
+            
+            // Set additional storage information
+            fileRecord.setFileSize(storageResult.getFileSize());
             
             // Categorize the file
             String category = ruleEngineService.categorizeFile(fileRecord);
@@ -88,13 +85,14 @@ public class FileService {
             FileRecord savedFile = fileRepository.save(fileRecord);
             
             loggingService.logInfo("File uploaded and processed successfully", "UPLOAD", 
-                "User: " + email + ", File: " + fileName + ", Category: " + category + ", ID: " + savedFile.getId());
+                "User: " + email + ", File: " + fileName + ", Category: " + category + 
+                ", Storage: " + storageResult.getStorageType() + ", ID: " + savedFile.getId());
             
             return savedFile;
             
         } catch (Exception e) {
-            // Clean up file on error
-            Files.deleteIfExists(filePath);
+            loggingService.logError("File upload failed", "UPLOAD", 
+                "User: " + email + ", File: " + fileName + ", Error: " + e.getMessage());
             throw e;
         }
     }
@@ -1204,6 +1202,34 @@ public class FileService {
         int lastDotIndex = fileName.lastIndexOf('.');
         if (lastDotIndex > 0 && lastDotIndex < fileName.length() - 1) {
             fileRecord.setFileExtension(fileName.substring(lastDotIndex + 1).toLowerCase());
+        }
+        
+        return fileRecord;
+    }
+
+    private FileRecord createFileRecordFromStorage(FileStorageService.FileStorageResult storageResult) throws IOException {
+        FileRecord fileRecord = new FileRecord();
+        fileRecord.setFileName(storageResult.getOriginalFileName());
+        fileRecord.setFilePath(storageResult.getPrimaryPath());
+        fileRecord.setFileSize(storageResult.getFileSize());
+        fileRecord.setCreatedDate(LocalDateTime.now());
+        fileRecord.setModifiedDate(LocalDateTime.now());
+        fileRecord.setScannedDate(LocalDateTime.now());
+        fileRecord.setMimeType(storageResult.getContentType());
+        
+        // Calculate file hash from stored file
+        Path filePath = Paths.get(storageResult.getPrimaryPath());
+        String hash = calculateFileHash(filePath);
+        fileRecord.setFileHash(hash);
+        fileRecord.setChecksum(hash);
+        
+        // Set file extension
+        String fileName = storageResult.getOriginalFileName();
+        if (fileName != null) {
+            int lastDotIndex = fileName.lastIndexOf('.');
+            if (lastDotIndex > 0 && lastDotIndex < fileName.length() - 1) {
+                fileRecord.setFileExtension(fileName.substring(lastDotIndex + 1).toLowerCase());
+            }
         }
         
         return fileRecord;

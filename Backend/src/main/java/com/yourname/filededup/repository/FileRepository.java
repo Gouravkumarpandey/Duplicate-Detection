@@ -371,6 +371,43 @@ public interface FileRepository extends MongoRepository<FileRecord, String> {
     @Query("{ 'uploadedBy': { $in: ?0 } }")
     List<FileRecord> findByUploadedByIn(List<String> uploaders);
     
+    // ============ STORAGE MANAGEMENT QUERIES ============
+    
+    @Query("{ 'storageLocation': { $regex: ?0, $options: 'i' } }")
+    List<FileRecord> findByStorageLocationContaining(String pattern);
+    
+    @Query("{ 'storedFileName': ?0 }")
+    Optional<FileRecord> findByStoredFileName(String storedFileName);
+    
+    @Query("{ 'mimeType': { $in: ?0 } }")
+    List<FileRecord> findByMimeTypeIn(List<String> mimeTypes);
+    
+    @Query("{ 'fileExtension': { $in: ?0 } }")
+    List<FileRecord> findByFileExtensionIn(List<String> extensions);
+    
+    @Query(value = "{ 'mimeType': { $in: ?0 } }", count = true)
+    long countByMimeTypeIn(List<String> mimeTypes);
+    
+    @Query(value = "{ 'fileExtension': { $in: ?0 } }", count = true)
+    long countByFileExtensionIn(List<String> extensions);
+    
+    // Find files with invalid or missing storage information
+    @Query("{ $or: [ { 'storageLocation': { $exists: false } }, { 'storageLocation': null }, { 'storageLocation': '' } ] }")
+    List<FileRecord> findFilesWithInvalidStorage();
+    
+    // Find files by storage pattern (for different storage types)
+    @Query("{ 'storageLocation': { $regex: '^gridfs://', $options: 'i' } }")
+    List<FileRecord> findGridFSFiles();
+    
+    @Query("{ 'storageLocation': { $regex: '^s3://', $options: 'i' } }")
+    List<FileRecord> findS3Files();
+    
+    @Query("{ 'storageLocation': { $regex: '^gs://', $options: 'i' } }")
+    List<FileRecord> findGoogleCloudFiles();
+    
+    @Query("{ 'storageLocation': { $not: { $regex: '^(gridfs|s3|gs)://', $options: 'i' } } }")
+    List<FileRecord> findLocalFiles();
+
     // ============ STATISTICAL HELPER INTERFACES ============
     
     public static interface CategoryStatistics {

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -724,5 +725,76 @@ public class FileController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("status", "unhealthy", "error", e.getMessage()));
         }
+    }
+
+    // ============ FILE VALIDATION AND STORAGE INFO ENDPOINTS ============
+
+    @PostMapping("/validate-type")
+    public ResponseEntity<Map<String, Object>> validateFileType(@RequestParam("file") MultipartFile file) {
+        try {
+            String fileType = file.getContentType();
+            String fileName = file.getOriginalFilename();
+            
+            boolean isValid = isValidFileType(fileType, fileName);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("valid", isValid);
+            response.put("fileName", fileName);
+            response.put("contentType", fileType);
+            response.put("fileSize", file.getSize());
+            
+            if (isValid) {
+                response.put("message", "File type is supported");
+                response.put("allowedTypes", List.of("text/plain", "application/pdf", 
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"));
+            } else {
+                response.put("error", "Unsupported file type. Only .txt, .pdf, and .docx files are allowed.");
+                response.put("allowedExtensions", List.of(".txt", ".pdf", ".docx"));
+            }
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "Failed to validate file: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/storage-info")
+    public ResponseEntity<Map<String, Object>> getStorageInfo() {
+        try {
+            Map<String, Object> storageInfo = new HashMap<>();
+            storageInfo.put("maxFileSize", "100MB");
+            storageInfo.put("maxFileSizeBytes", 100 * 1024 * 1024);
+            storageInfo.put("allowedTypes", List.of("text/plain", "application/pdf", 
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"));
+            storageInfo.put("allowedExtensions", List.of(".txt", ".pdf", ".docx"));
+            storageInfo.put("storageOptions", List.of("LOCAL", "GRIDFS", "S3", "GOOGLE_CLOUD"));
+            storageInfo.put("currentStorageType", "LOCAL"); // This could be read from configuration
+            
+            return ResponseEntity.ok(storageInfo);
+            
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "Failed to get storage info: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/supported-types")
+    public ResponseEntity<Map<String, Object>> getSupportedFileTypes() {
+        Map<String, Object> supportedTypes = new HashMap<>();
+        supportedTypes.put("mimeTypes", List.of(
+            "text/plain",
+            "application/pdf", 
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ));
+        supportedTypes.put("extensions", List.of(".txt", ".pdf", ".docx"));
+        supportedTypes.put("descriptions", Map.of(
+            "text/plain", "Plain text files (.txt)",
+            "application/pdf", "Portable Document Format (.pdf)",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Microsoft Word documents (.docx)"
+        ));
+        
+        return ResponseEntity.ok(supportedTypes);
     }
 }

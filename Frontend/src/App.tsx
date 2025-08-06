@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { FolderOpen, Search, Trash2, FileX, CheckSquare, Square, FileText, Download } from 'lucide-react';
+import { FolderOpen, Trash2, FileX, CheckSquare, Square, Download } from 'lucide-react';
 import FileScanner from './components/FileScanner';
 import DuplicateList from './components/DuplicateList';
 import CategoryView from './components/CategoryView';
@@ -7,7 +7,7 @@ import LogViewer from './components/LogViewer';
 import DirectoryScanner from './components/DirectoryScanner';
 import { FileInfo, DuplicateGroup, LogEntry } from './types/FileTypes';
 import { generateFileHash, exportLogs } from './utils/fileUtils';
-import { apiService } from './api/ApiService';
+import { mockApiScan, mockApiDelete, mockApiSaveLogs, mockApiScanDirectories } from './api/mockApi';
 
 function App() {
   const [files, setFiles] = useState<FileInfo[]>([]);
@@ -131,7 +131,7 @@ function App() {
       console.error('Error deleting files:', error);
       alert('Error deleting files. Please try again.');
     }
-  }, [selectedFiles, files, categories]);
+  }, [selectedFiles, categories]);
 
   const selectAllDuplicates = useCallback(() => {
     const allDuplicatePaths = duplicates.flatMap(group => 
