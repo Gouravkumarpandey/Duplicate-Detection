@@ -1,0 +1,17 @@
+Technical Architecture Overview
+
+The file deduplication system uses Spring Boot with MongoDB Atlas for backend processing.
+
+Components:
+- FolderUploadController: Handles REST API endpoints
+- FolderUploadService: Business logic for file processing  
+- FileModel: MongoDB document model for metadata storage
+- FileHashUtil: SHA-256 hash calculation utilities
+
+Database Schema:
+- filename: String
+- fileType: String (MIME type)
+- hash: String (SHA-256)
+- uploadDate: Date
+- fileSize: Long (bytes)
+- isDuplicate: Boolean
