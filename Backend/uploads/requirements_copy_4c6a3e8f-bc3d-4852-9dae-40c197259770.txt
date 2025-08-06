@@ -1,0 +1,10 @@
+Project Requirements Document
+
+This document outlines the requirements for the file deduplication system.
+The system should automatically detect duplicate files and store metadata in MongoDB Atlas.
+
+Key Features:
+1. SHA-256 hash generation for content-based duplicate detection
+2. Support for .txt, .pdf, and .docx file types
+3. Automatic metadata storage in MongoDB Atlas
+4. Folder upload capability for batch processing

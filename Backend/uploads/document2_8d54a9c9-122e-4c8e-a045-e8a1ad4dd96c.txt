@@ -1,0 +1,3 @@
+This is the second test document.
+It has different content from the first document.
+This should also be uploaded successfully as a .txt file.

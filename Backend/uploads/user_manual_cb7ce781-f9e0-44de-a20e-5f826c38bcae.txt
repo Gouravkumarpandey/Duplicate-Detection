@@ -1,0 +1,22 @@
+User Manual
+
+Welcome to the File Deduplication System!
+
+Getting Started:
+1. Navigate to the "Folder Upload" tab
+2. Click "Choose files from folder" 
+3. Select multiple files (.txt, .pdf, .docx)
+4. Click "Upload X Files" to start processing
+
+The system will:
+- Calculate SHA-256 hash for each file
+- Check for duplicates in the database
+- Save file metadata to MongoDB Atlas
+- Display detailed results with duplicate detection
+
+Features:
+- Real-time upload progress
+- Duplicate detection with visual indicators
+- File type validation
+- Comprehensive upload statistics
+- Error handling for invalid files
