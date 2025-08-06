@@ -1,0 +1,110 @@
+{
+  "categories": {
+    "Images": {
+      "description": "Image files including photos, graphics, and icons",
+      "extensions": ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "tif", "svg", "webp", "ico", "raw", "psd", "ai", "eps"],
+      "mimeTypes": ["image/*"],
+      "priority": 1
+    },
+    "Videos": {
+      "description": "Video files and multimedia content",
+      "extensions": ["mp4", "avi", "mkv", "mov", "wmv", "flv", "webm", "m4v", "mpg", "mpeg", "3gp", "asf", "rm", "swf"],
+      "mimeTypes": ["video/*"],
+      "priority": 1
+    },
+    "Audio": {
+      "description": "Audio files and music",
+      "extensions": ["mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "opus", "aiff", "au", "ra", "mid", "midi"],
+      "mimeTypes": ["audio/*"],
+      "priority": 1
+    },
+    "Documents": {
+      "description": "Text documents, PDFs, and office files",
+      "extensions": ["pdf", "doc", "docx", "txt", "rtf", "odt", "xls", "xlsx", "ppt", "pptx", "odp", "ods", "pages", "numbers", "key"],
+      "mimeTypes": ["application/pdf", "application/msword", "text/*"],
+      "priority": 2
+    },
+    "Archives": {
+      "description": "Compressed and archive files",
+      "extensions": ["zip", "rar", "7z", "tar", "gz", "bz2", "xz", "lzma", "cab", "iso", "dmg", "pkg"],
+      "mimeTypes": ["application/zip", "application/x-rar-compressed"],
+      "priority": 2
+    },
+    "Code": {
+      "description": "Source code and development files",
+      "extensions": ["java", "js", "ts", "py", "cpp", "c", "h", "hpp", "cs", "php", "rb", "go", "rs", "swift", "kt", "scala", "html", "css", "xml", "json", "yaml", "yml", "sql", "sh", "bat", "ps1"],
+      "mimeTypes": ["text/html", "application/json", "application/xml"],
+      "priority": 3
+    },
+    "Executables": {
+      "description": "Executable files and applications",
+      "extensions": ["exe", "msi", "deb", "rpm", "dmg", "pkg", "app", "apk", "ipa"],
+      "mimeTypes": ["application/x-executable"],
+      "priority": 2
+    },
+    "Fonts": {
+      "description": "Font files",
+      "extensions": ["ttf", "otf", "woff", "woff2", "eot"],
+      "mimeTypes": ["font/*"],
+      "priority": 4
+    },
+    "Data": {
+      "description": "Database and data files",
+      "extensions": ["db", "sqlite", "mdb", "accdb", "csv", "tsv", "dat", "log"],
+      "mimeTypes": ["application/vnd.ms-access"],
+      "priority": 3
+    },
+    "Configuration": {
+      "description": "Configuration and settings files",
+      "extensions": ["conf", "config", "ini", "cfg", "plist", "properties", "env"],
+      "mimeTypes": [],
+      "priority": 4
+    },
+    "System": {
+      "description": "System and temporary files",
+      "extensions": ["sys", "dll", "so", "dylib", "tmp", "temp", "cache", "thumbs", "ds_store"],
+      "mimeTypes": [],
+      "priority": 5
+    },
+    "Large Files": {
+      "description": "Files larger than 100MB",
+      "extensions": [],
+      "mimeTypes": [],
+      "sizeThreshold": 104857600,
+      "priority": 6
+    },
+    "Small Files": {
+      "description": "Files smaller than 1KB",
+      "extensions": [],
+      "mimeTypes": [],
+      "sizeThreshold": 1024,
+      "priority": 6
+    },
+    "Other": {
+      "description": "Uncategorized files",
+      "extensions": [],
+      "mimeTypes": [],
+      "priority": 10
+    }
+  },
+  "rules": {
+    "duplicate_detection": {
+      "enabled": true,
+      "hash_algorithm": "SHA-256",
+      "ignore_hidden_files": true,
+      "ignore_system_files": true
+    },
+    "categorization": {
+      "enabled": true,
+      "use_extension": true,
+      "use_mime_type": true,
+      "use_file_size": true,
+      "use_content_analysis": false
+    },
+    "exclusions": {
+      "directories": [".git", ".svn", ".hg", "node_modules", ".cache", "temp", "tmp"],
+      "extensions": ["tmp", "temp", "cache", "lock", "log"],
+      "patterns": [".*", "~*", "#*#"]
+    }
+  }
+}

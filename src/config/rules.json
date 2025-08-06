@@ -1,0 +1,62 @@
+{
+  "rules": [
+    {
+      "name": "Installer",
+      "conditions": {
+        "pathContains": ["setup", "install", "installer"],
+        "filenameContains": ["setup", "install", "installer"],
+        "extensions": [".msi", ".pkg", ".dmg"]
+      }
+    },
+    {
+      "name": "Executable",
+      "conditions": {
+        "extensions": [".exe", ".app", ".deb", ".rpm"]
+      }
+    },
+    {
+      "name": "Driver",
+      "conditions": {
+        "pathContains": ["driver", "drivers"],
+        "filenameContains": ["driver", "drivers"]
+      }
+    },
+    {
+      "name": "Browser",
+      "conditions": {
+        "filenameContains": ["chrome", "firefox", "edge", "safari", "opera", "browser"]
+      }
+    },
+    {
+      "name": "Media Player",
+      "conditions": {
+        "filenameContains": ["vlc", "media", "player", "music", "video", "mp3", "mp4", "winamp"]
+      }
+    },
+    {
+      "name": "Developer Tools",
+      "conditions": {
+        "filenameContains": ["vscode", "code", "eclipse", "java", "python", "dev", "git", "node"]
+      }
+    },
+    {
+      "name": "Games",
+      "conditions": {
+        "filenameContains": ["game", "steam", "epic", "launcher", "play"]
+      }
+    },
+    {
+      "name": "Office",
+      "conditions": {
+        "filenameContains": ["word", "excel", "office", "document", "pdf", "text"]
+      }
+    },
+    {
+      "name": "System",
+      "conditions": {
+        "pathContains": ["system", "windows", "program files"],
+        "filenameContains": ["system", "service", "windows", "mac", "linux"]
+      }
+    }
+  ]
+}
