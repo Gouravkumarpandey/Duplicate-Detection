@@ -1,12 +1,12 @@
-C:\Users\kumar\OneDrive\Desktop\Duplicate Detection\Backend\src\main\java\com\yourname\filededup\repository\FileRepository.java
-C:\Users\kumar\OneDrive\Desktop\Duplicate Detection\Backend\src\main\java\com\yourname\filededup\config\CorsConfig.java
-C:\Users\kumar\OneDrive\Desktop\Duplicate Detection\Backend\src\main\java\com\yourname\filededup\repository\LogRepository.java
-C:\Users\kumar\OneDrive\Desktop\Duplicate Detection\Backend\src\main\java\com\yourname\filededup\service\LoggingService.java
-C:\Users\kumar\OneDrive\Desktop\Duplicate Detection\Backend\src\main\java\com\yourname\filededup\model\FileRecord.java
-C:\Users\kumar\OneDrive\Desktop\Duplicate Detection\Backend\src\main\java\com\yourname\filededup\controller\LogController.java
-C:\Users\kumar\OneDrive\Desktop\Duplicate Detection\Backend\src\main\java\com\yourname\filededup\service\RuleEngineService.java
-C:\Users\kumar\OneDrive\Desktop\Duplicate Detection\Backend\src\main\java\com\yourname\filededup\service\FileService.java
-C:\Users\kumar\OneDrive\Desktop\Duplicate Detection\Backend\src\main\java\com\yourname\filededup\controller\FileController.java
-C:\Users\kumar\OneDrive\Desktop\Duplicate Detection\Backend\src\main\java\com\yourname\filededup\FileDedupApplication.java
-C:\Users\kumar\OneDrive\Desktop\Duplicate Detection\Backend\src\main\java\com\yourname\filededup\config\MongoConfig.java
-C:\Users\kumar\OneDrive\Desktop\Duplicate Detection\Backend\src\main\java\com\yourname\filededup\model\LogEntry.java
+C:\Users\kumar\Downloads\Duplicate-Detection\Backend\src\main\java\com\yourname\filededup\controller\FileController.java
+C:\Users\kumar\Downloads\Duplicate-Detection\Backend\src\main\java\com\yourname\filededup\repository\LogRepository.java
+C:\Users\kumar\Downloads\Duplicate-Detection\Backend\src\main\java\com\yourname\filededup\service\LoggingService.java
+C:\Users\kumar\Downloads\Duplicate-Detection\Backend\src\main\java\com\yourname\filededup\model\FileRecord.java
+C:\Users\kumar\Downloads\Duplicate-Detection\Backend\src\main\java\com\yourname\filededup\config\CorsConfig.java
+C:\Users\kumar\Downloads\Duplicate-Detection\Backend\src\main\java\com\yourname\filededup\repository\FileRepository.java
+C:\Users\kumar\Downloads\Duplicate-Detection\Backend\src\main\java\com\yourname\filededup\model\LogEntry.java
+C:\Users\kumar\Downloads\Duplicate-Detection\Backend\src\main\java\com\yourname\filededup\config\MongoConfig.java
+C:\Users\kumar\Downloads\Duplicate-Detection\Backend\src\main\java\com\yourname\filededup\FileDedupApplication.java
+C:\Users\kumar\Downloads\Duplicate-Detection\Backend\src\main\java\com\yourname\filededup\controller\LogController.java
+C:\Users\kumar\Downloads\Duplicate-Detection\Backend\src\main\java\com\yourname\filededup\service\RuleEngineService.java
+C:\Users\kumar\Downloads\Duplicate-Detection\Backend\src\main\java\com\yourname\filededup\service\FileService.java

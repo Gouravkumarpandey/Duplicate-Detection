@@ -8,6 +8,7 @@ import DirectoryScanner from './components/DirectoryScanner';
 import { FileInfo, DuplicateGroup, LogEntry } from './types/FileTypes';
 import { generateFileHash, exportLogs } from './utils/fileUtils';
 import { apiService } from './api/ApiService';
+import { mockApiScan, mockApiScanDirectories, mockApiDelete, mockApiSaveLogs } from './api/mockApi';
 
 function App() {
   const [files, setFiles] = useState<FileInfo[]>([]);

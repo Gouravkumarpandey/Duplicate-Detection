@@ -41,12 +41,11 @@ export interface LogEntry {
   message: string;
   filePath?: string;
   hash?: string;
-  [category: string]: string[];
 }
 
 export interface ApiResponse {
   success: boolean;
   message?: string;
-  data?: any;
+  data?: unknown;
   logs?: LogEntry[];
 }
