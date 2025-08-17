@@ -339,6 +339,36 @@ public class FileService {
         return fileRecord;
     }
 
+    public int saveFiles(List<Map<String, Object>> fileDataList) {
+        int savedCount = 0;
+        for (Map<String, Object> fileData : fileDataList) {
+            try {
+                FileRecord fileRecord = new FileRecord();
+                fileRecord.setFilePath(fileData.get("path").toString());
+                fileRecord.setFileName(fileData.get("name").toString());
+                fileRecord.setFileSize(Long.parseLong(fileData.get("size").toString()));
+                fileRecord.setFileHash(fileData.get("hash").toString());
+                fileRecord.setCategory(fileData.get("category") != null ? fileData.get("category").toString() : "Uncategorized");
+                fileRecord.setFileExtension(fileData.get("extension") != null ? fileData.get("extension").toString() : "");
+                fileRecord.setCreatedDate(LocalDateTime.now());
+                fileRecord.setScannedDate(LocalDateTime.now());
+                
+                // Save to database
+                fileRepository.save(fileRecord);
+                savedCount++;
+                
+                // Log the save operation
+                loggingService.logInfo("File saved to database", "SAVE", 
+                    "File: " + fileRecord.getFileName() + ", Hash: " + fileRecord.getFileHash());
+                    
+            } catch (Exception e) {
+                loggingService.logError("Failed to save file", "SAVE_ERROR", 
+                    "File: " + fileData.get("name") + ", Error: " + e.getMessage());
+            }
+        }
+        return savedCount;
+    }
+
     private String calculateFileHash(Path filePath) throws IOException {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");

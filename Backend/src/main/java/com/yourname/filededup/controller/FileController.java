@@ -230,6 +230,30 @@ public class FileController {
         }
     }
 
+    @PostMapping("/save")
+    public ResponseEntity<Map<String, Object>> saveFiles(@RequestBody List<Map<String, Object>> fileData) {
+        try {
+            if (fileData == null || fileData.isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "File data is required"));
+            }
+            
+            int savedCount = fileService.saveFiles(fileData);
+            return ResponseEntity.ok(Map.of(
+                "message", "Files saved successfully",
+                "savedCount", savedCount,
+                "savedFiles", fileData.stream().map(f -> f.get("path")).toList(),
+                "failedFiles", List.of(),
+                "totalRequested", fileData.size(),
+                "successCount", savedCount,
+                "failureCount", 0
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "Failed to save files: " + e.getMessage()));
+        }
+    }
+
     @GetMapping("/search")
     public ResponseEntity<List<FileRecord>> searchFiles(
             @RequestParam(required = false) String fileName,
